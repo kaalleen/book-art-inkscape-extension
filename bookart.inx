@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+  <name>Book Art</name>
+  <id>org.kaalleen.bookart</id>
+  <param name="tabs" type="notebook">
+    <page name="settings-tab" gui-text="General Settings">
+      <label appearance="header">Pages</label>
+      <param name="first_page" type="int" min="1" max="5000"
+             gui-text="First even page number">2</param>
+      <param name="last_page" type="int" min="1" max="5000"
+             gui-text="Last even page number">300</param>
+      <param name="pages_before" type="int" min="0" max="5000" gui-text="Pages before the design"
+             gui-description="Actual sheets (page numbers / 2)">0</param>
+      <param name="pages_after" type="int" min="0" max="5000" gui-text="Pages after the design"
+             gui-description="Actual sheets (page numbers / 2)">0</param>
+      <spacer />
+      <label appearance="header">Measurements</label>
+      <param name="book_height" type="float" min="0" max="2000" gui-text="Book height"
+             precision="2">200</param>
+      <param name="vertical_adjustment" type="float" min="-1000" max="1000"
+             gui-text="Vertical adjustment" precision="2">0</param>
+      <param name="line_distance" type="float" min="0" max="100" gui-text="Distance between lines"
+             gui-description="0 = no distortion" precision="2">0</param>
+      <param name="font_size" type="float" min="0" max="40" gui-text="Font size">2.0</param>
+      <param name="stroke_width" type="float" min="0" max="20" gui-text="Stroke width"
+             precision="3">0</param>
+      <param name="split_group" type="float" min="0" max="2000" gui-text="Split"
+            gui-description="Split design after this length to fit on page. 0 = don't split"
+            precision="2">0</param>
+      <param name="units" type="optiongroup" appearance="combo" gui-text="Units">
+        <option value="mm">mm</option>
+        <option value="cm">cm</option>
+        <option value="in">in</option>
+        <option value="in">pc</option>
+        <option value="in">pt</option>
+        <option value="px">px</option>
+      </param>
+    </page>
+    <page name="colors-tab" gui-text="Colors">
+      <label appearance="header">Colors</label>
+      <param name="color_pattern" type="color" appearance="colorbutton"
+             gui-text="Pattern">0x000000ff</param>
+      <param name="color_highlight1" type="color" appearance="colorbutton"
+             gui-text="Highlight 1">0xed333bff</param>
+      <param name="color_highlight2" type="color" appearance="colorbutton"
+             gui-text="Highlight 2">0xffbe6fff</param>
+      <param name="color_background" type="color" appearance="colorbutton"
+             gui-text="Background">0xf9f06bff</param>
+    </page>
+    <page name="about-tab" gui-text="About">
+        <label appearance="header">Cut and fold book art pattern maker</label>
+        <label>This extension converts selected objects into a pattern for cut and fold book art.</label>
+        <spacer />
+        <image>bookart.png</image>
+    </page>
+  </param>
+  <effect>
+    <object-type>all</object-type>
+      <effects-menu>
+        <submenu name="Modify Path"/>
+      </effects-menu>
+  </effect>
+  <script>
+    <command location="inx" interpreter="python">bookart.py</command>
+  </script>
+</inkscape-extension>

@@ -1,0 +1,25 @@
+name: Release Zip
+on:
+  push:
+    tags:
+      - "v*.*.*"
+jobs:
+    make-zip:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v2
+        - name: Make a file
+          shell: bash
+          run: |
+            7z a bookart-${{ github.ref_name }}.zip bookart.py bookart.inx README.md LICENSE bookart.png bookart_extension.png
+        - name: Upload bookart zip
+          uses: actions/upload-artifact@v3
+          with:
+            name: upload zip
+            path: bookart-${{ github.ref_name }}.zip
+        - name: Release
+          uses: softprops/action-gh-release@v1
+          if: startsWith(github.ref, 'refs/tags/')
+          with:
+            files: bookart-${{ github.ref_name }}.zip
