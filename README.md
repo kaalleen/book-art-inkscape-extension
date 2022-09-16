@@ -26,6 +26,8 @@ First import or create your design and scale it to the correct size.
 
 ### How to cut and fold your book
 
+![Book with pattern](bookart.png)
+
 Print the pattern and prepare your tools:
 
    * book and the printed pattern
@@ -40,4 +42,4 @@ Now draw two vertical lines on every page of the book:
 
 Use the pattern to mark the cut points. Cut horizontally from the mark to the cut line. Then fold. You can either fold the pattern to the inside or to the outside to achieve a different effect.
 
-![Book with pattern](bookart.png)
+![howto illustration](howto.png)
