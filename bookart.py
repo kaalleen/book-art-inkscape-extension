@@ -217,8 +217,7 @@ class Bookart(EffectExtension):
 
     def _insert_element_into_design_group(self, element):
         if element.tag_name in ['rect', 'circle', 'ellipse', 'path']:
-            transform = element.getparent().composed_transform()
-            element.transform.add_matrix(transform)
+            element.transform = element.composed_transform()
             self.design.insert(0, element)
 
     def _scale_element(self):
