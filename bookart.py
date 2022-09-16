@@ -24,9 +24,8 @@ Technically it simply creates vertical lines and uses the pattern as a clip.
 
 from math import ceil
 
-from inkex import (ClipPath, EffectExtension, Group, Path, PathElement,
-                   TextElement, Transform, Tspan, colors, errormsg)
-from inkex.localization import inkex_gettext as _
+from inkex import (ClipPath, EffectExtension, Group, Layer, Path, PathElement,
+                   TextElement, Transform, Tspan, colors)
 
 
 class Bookart(EffectExtension):
@@ -39,7 +38,8 @@ class Bookart(EffectExtension):
         self.line_distance = None
         self.vertical_adjustment = None
         self.stroke_width = None
-        self.combined_shape = None
+        self.design = None
+        self.transform = None
 
     def add_arguments(self, pars):
         # tabs
@@ -71,10 +71,6 @@ class Bookart(EffectExtension):
                           default=colors.Color('#f9f06bff'))
 
     def effect(self):
-        if not self.svg.selection:
-            errormsg(_("Please select one object."))
-            return
-
         self.total_pages = (self.options.last_page - self.options.first_page) / 2
         # convert units to px
         self.book_height = str(self.options.book_height) + self.options.units
@@ -88,12 +84,14 @@ class Bookart(EffectExtension):
         split_group = str(self.options.split_group) + self.options.units
         split_group = self.svg.viewport_to_unit(split_group)
 
-        # prepare shape
-        self._get_shape()
-        self.line_distance = self._scale_element()
+        # prepare design
+        self._generate_design_group()
+        if len(self.design) == 0:
+            return
+        self._scale_element()
 
-        # combine selected paths
-        clip = ClipPath(self.combined_shape)
+        # clip selected paths
+        clip = ClipPath(self.design)
         self.svg.defs.add(clip)
 
         if split_group == 0:
@@ -102,6 +100,8 @@ class Bookart(EffectExtension):
         else:
             # add a little to line distance to adjust for rounding errors
             num_segments = ceil((self.line_distance * self.total_pages) / split_group)
+            if num_segments == 0:
+                return
             lines_per_seg = ceil(self.total_pages / num_segments)
 
         for segment in range(num_segments):
@@ -109,26 +109,22 @@ class Bookart(EffectExtension):
             line_paths, page_num_element = self._get_line_paths_and_numbers(segment, lines_per_seg)
 
             # insert into document
-            self._insert_elements(line_paths, page_num_element, lines, segment)
+            self._insert_elements_to_document(line_paths, page_num_element, lines, segment)
             lines[0].clip = clip
 
-    def _insert_elements(self, line_paths, page_num_element, lines, segment):
+    def _insert_elements_to_document(self, line_paths, page_num_element, lines, segment):
         # insert lines into the svg
-        group = Group(id=f"bookart_group_{segment}")
-        self.svg.get_current_layer().insert(0, group)
+        layer = Layer()
+        layer.label = "Book Art"
+        self.svg.insert(0, layer)
+        group = Group(id=f"Page #{segment + 1}")
+        layer.insert(0, group)
         for i, line in enumerate(lines):
             line.path = Path(line_paths[i])
             group.insert(0, line)
         group.insert(0, page_num_element)
-
-    def _get_shape(self):
-        selected_path = str()
-        for selection in self.svg.selection:
-            transform = selection.composed_transform()
-            selected_path += str(Path(selection.get_path()).transform(transform))
-            selection.getparent().remove(selection)
-        # make a path element and set path
-        self.combined_shape = PathElement(d=selected_path)
+        group.transform.add_matrix(self.transform)
+        return group
 
     def _get_line_paths_and_numbers(self, segment, lines_per_seg):
         top, bottom, left, right = self._get_line_positions()
@@ -167,10 +163,12 @@ class Bookart(EffectExtension):
         return line_paths, page_num_element
 
     def _get_line_positions(self):
-        bbox = self.combined_shape.bounding_box()
+        bbox = self.design.bounding_box()
         # position of the first line at the left side of the bounding box
-        left, top = bbox.minimum
-        right, bottom = bbox.maximum
+        left = bbox.left
+        top = bbox.top
+        right = bbox.right
+        bottom = bbox.bottom
 
         left -= self.options.pages_before * self.line_distance
         right += self.options.pages_after * self.line_distance
@@ -202,20 +200,43 @@ class Bookart(EffectExtension):
             lines.append(PathElement(style=style))
         return lines
 
+    def _generate_design_group(self):
+        self.design = Group()
+        # No selection -> Select all
+        if not self.svg.selection:
+            elements = self.svg.xpath('.//svg:rect|.//svg:circle|.//svg:ellipse|.//svg:path')
+            for element in elements:
+                self._insert_element_into_design_group(element)
+            return
+        for selection in self.svg.selection:
+            if selection.tag_name == 'g':
+                for element in selection.iterdescendants():
+                    self._insert_element_into_design_group(element)
+            else:
+                self._insert_element_into_design_group(selection)
+
+    def _insert_element_into_design_group(self, element):
+        if element.tag_name in ['rect', 'circle', 'ellipse', 'path']:
+            transform = element.getparent().composed_transform()
+            element.transform.add_matrix(transform)
+            self.design.insert(0, element)
+
     def _scale_element(self):
         num_pages = self.total_pages - self.options.pages_before - self.options.pages_after
-        if num_pages == 0:
-            return self.line_distance
-        bbox = self.combined_shape.bounding_box()
+        bbox = self.design.bounding_box()
         width = bbox.width
+        if num_pages <= 0 or width == 0:
+            return
         line_dist = width / num_pages
         if self.options.line_distance == 0:
-            return line_dist
-        if line_dist == 0:
-            return self.line_distance
-        transform = f'scale({self.line_distance / line_dist}, 1)'
-        self.combined_shape.transform = Transform(transform)
-        return self.line_distance
+            self.line_distance = line_dist
+            return
+        scale_x = self.line_distance / line_dist
+        transform = f'scale({scale_x}, 1)'
+        self.design.transform = Transform(transform)
+        translate_x = bbox.left - self.design.bounding_box().left
+        translate_y = bbox.bottom - self.design.bounding_box().bottom
+        self.transform = f'translate({translate_x}, {translate_y})'
 
 
 if __name__ == '__main__':

@@ -21,9 +21,9 @@
              gui-text="Vertical adjustment" precision="2">0</param>
       <param name="line_distance" type="float" min="0" max="100" gui-text="Distance between lines"
              gui-description="0 = no distortion" precision="2">0</param>
-      <param name="font_size" type="float" min="0" max="40" gui-text="Font size">2.0</param>
+      <param name="font_size" type="float" min="0" max="40" gui-text="Font size">1.0</param>
       <param name="stroke_width" type="float" min="0" max="20" gui-text="Stroke width"
-             precision="3">0</param>
+             precision="3">0.265</param>
       <param name="split_group" type="float" min="0" max="2000" gui-text="Split"
             gui-description="Split design after this length to fit on page. 0 = don't split"
             precision="2">0</param>
@@ -57,7 +57,7 @@
   <effect>
     <object-type>all</object-type>
       <effects-menu>
-        <submenu name="Modify Path"/>
+        <submenu name="Generate from Path"/>
       </effects-menu>
   </effect>
   <script>

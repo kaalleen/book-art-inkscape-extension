@@ -14,7 +14,7 @@ Works with Inkscape 1.2
 
 First import or create your design and scale it to the correct size.
 
-* Open Extensions > Modify Path > Book Art ...
+* Open Extensions > Generate from Path > Book Art ...
 * Set parameters as necessary, here the important ones:
     * number of pages (start page, end page)
     * book height
