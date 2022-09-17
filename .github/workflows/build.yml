@@ -12,7 +12,7 @@ jobs:
         - name: Make a file
           shell: bash
           run: |
-            7z a bookart-${{ github.ref_name }}.zip bookart.py bookart.inx README.md LICENSE bookart.png bookart_extension.png howto.png
+            7z a bookart-${{ github.ref_name }}.zip bookart.py bookart.inx README.md LICENSE bookart.png bookart_extension.png bookart_howto.png
         - name: Upload bookart zip
           uses: actions/upload-artifact@v3
           with:

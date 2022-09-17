@@ -42,4 +42,4 @@ Now draw two vertical lines on every page of the book:
 
 Use the pattern to mark the cut points. Cut horizontally from the mark to the cut line. Then fold. You can either fold the pattern to the inside or to the outside to achieve a different effect.
 
-![howto illustration](howto.png)
+![howto illustration](bookart_howto.png)
