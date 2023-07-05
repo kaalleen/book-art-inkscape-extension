@@ -1,8 +1,9 @@
 # coding=utf-8
 
+from inkex.tester import ComparisonMixin, TestCase
+
 from bookart import Bookart
 
-from inkex.tester import ComparisonMixin, TestCase
 
 class BookartTest(ComparisonMixin, TestCase):
     """Test bookart extension with comparisons"""
