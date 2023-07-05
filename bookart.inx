@@ -3,48 +3,64 @@
   <name>Book Art</name>
   <id>org.kaalleen.bookart</id>
   <param name="tabs" type="notebook">
-    <page name="settings-tab" gui-text="General Settings">
+    <page name="settings-tab" gui-text="Book Settings">
       <label appearance="header">Pages</label>
-      <param name="first_page" type="int" min="1" max="5000"
+      <param name="first_page" type="int" min="1" max="5000" indent="1"
              gui-text="First even page number">2</param>
-      <param name="last_page" type="int" min="1" max="5000"
+      <param name="last_page" type="int" min="1" max="5000" indent="1"
              gui-text="Last even page number">300</param>
-      <param name="pages_before" type="int" min="0" max="5000" gui-text="Pages before the design"
+      <param name="pages_before" type="int" min="0" max="5000" indent="1"
+             gui-text="Pages before the design"
              gui-description="Actual sheets (page numbers / 2)">0</param>
-      <param name="pages_after" type="int" min="0" max="5000" gui-text="Pages after the design"
+      <param name="pages_after" type="int" min="0" max="5000" indent="1"
+             gui-text="Pages after the design"
              gui-description="Actual sheets (page numbers / 2)">0</param>
       <spacer />
       <label appearance="header">Measurements</label>
-      <param name="book_height" type="float" min="0" max="2000" gui-text="Book height"
+      <param name="book_height" type="float" min="0" max="2000"  indent="1" gui-text="Book height"
              precision="2">200</param>
-      <param name="vertical_adjustment" type="float" min="-1000" max="1000"
+      <param name="vertical_adjustment" type="float" min="-1000" max="1000" indent="1"
              gui-text="Vertical adjustment" precision="2">0</param>
-      <param name="line_distance" type="float" min="0" max="100" gui-text="Distance between lines"
+      <param name="line_distance" type="float" min="0" max="100" indent="1"
+             gui-text="Distance between lines"
              gui-description="0 = no distortion" precision="2">0</param>
-      <param name="font_size" type="float" min="0" max="40" gui-text="Font size">1.0</param>
-      <param name="stroke_width" type="float" min="0" max="20" gui-text="Stroke width"
-             precision="3">0.265</param>
-      <param name="split_group" type="float" min="0" max="2000" gui-text="Split"
-            gui-description="Split design after this length to fit on page. 0 = don't split"
-            precision="2">0</param>
-      <param name="units" type="optiongroup" appearance="combo" gui-text="Units">
+      <param name="font_size" type="float" min="0" max="40" indent="1"
+             gui-text="Font size">1.0</param>
+      <param name="stroke_width" type="float" min="0.01" max="20" indent="1"
+             gui-text="Stroke width" precision="3">0.265</param>
+      <param name="units" type="optiongroup" appearance="combo" gui-text="Units" indent="1">
         <option value="mm">mm</option>
         <option value="cm">cm</option>
         <option value="in">in</option>
-        <option value="in">pc</option>
-        <option value="in">pt</option>
+        <option value="pc">pc</option>
+        <option value="pt">pt</option>
         <option value="px">px</option>
       </param>
     </page>
-    <page name="colors-tab" gui-text="Colors">
+    <page name="colors-tab" gui-text="Output settings">
+      <label appearance="header">Document</label>
+      <param name="document_format" type="optiongroup" appearance="combo" indent="1"
+             gui-text="Format">
+        <option value="a4">A4</option>
+        <option value="letter">US Letter</option>
+      </param>
+      <hbox>
+          <param name="page_margins" type="float" min="0" max="50" indent="1"
+                 gui-text="Page margins (min)">1</param>
+          <param name="margin_unit" type="optiongroup" appearance="combo" indent="1"
+                 gui-text="Units">
+            <option value="cm">cm</option>
+            <option value="in">in</option>
+          </param>
+      </hbox>
       <label appearance="header">Colors</label>
-      <param name="color_pattern" type="color" appearance="colorbutton"
+      <param name="color_pattern" type="color" appearance="colorbutton" indent="1"
              gui-text="Pattern">0x000000ff</param>
-      <param name="color_highlight1" type="color" appearance="colorbutton"
+      <param name="color_highlight1" type="color" appearance="colorbutton" indent="1"
              gui-text="Highlight 1">0xed333bff</param>
-      <param name="color_highlight2" type="color" appearance="colorbutton"
+      <param name="color_highlight2" type="color" appearance="colorbutton" indent="1"
              gui-text="Highlight 2">0xffbe6fff</param>
-      <param name="color_background" type="color" appearance="colorbutton"
+      <param name="color_background" type="color" appearance="colorbutton" indent="1"
              gui-text="Background">0xf9f06bff</param>
     </page>
     <page name="about-tab" gui-text="About">
@@ -52,6 +68,8 @@
         <label>This extension converts selected objects into a pattern for cut and fold book art.</label>
         <spacer />
         <image>bookart.png</image>
+        <label>Detailed description:</label>
+        <label appearance="url">https://github.com/kaalleen/book-art-inkscape-extension</label>
     </page>
   </param>
   <effect>

@@ -19,13 +19,13 @@
 #
 """
 Extension to create cut and fold book art pattern.
-Technically it simply creates vertical lines and uses the pattern as a clip.
+Technically it simply creates vertical lines and clips the pattern.
 """
 
 from math import ceil
 
 from inkex import (ClipPath, EffectExtension, Group, Layer, Path, PathElement,
-                   TextElement, Transform, Tspan, colors)
+                   TextElement, Transform, Tspan, colors, units)
 
 
 class Bookart(EffectExtension):
@@ -43,10 +43,10 @@ class Bookart(EffectExtension):
 
     def add_arguments(self, pars):
         # tabs
-        self.arg_parser.add_argument("--tabs", type=str, default=None, dest="tabs")
-        self.arg_parser.add_argument("--settings-tab", type=str, default=None, dest="content_tab")
-        self.arg_parser.add_argument("--colors-tab", type=str, default=None, dest="layout_tab")
-        # general settings
+        pars.add_argument("--tabs", type=str, default=None, dest="tabs")
+        pars.add_argument("--settings-tab", type=str, default=None, dest="content_tab")
+        pars.add_argument("--colors-tab", type=str, default=None, dest="layout_tab")
+        # book settings
         pars.add_argument("--first_page", type=int, default=250, help="First even page number")
         pars.add_argument("--last_page", type=int, default=250, help="Last even page number")
         pars.add_argument("--pages_before", type=int, default=0, help="Pages before design")
@@ -57,11 +57,13 @@ class Bookart(EffectExtension):
         pars.add_argument("--vertical_adjustment", type=float, default=0.0,
                           help="Vertical adjustment")
         pars.add_argument("--font_size", type=float, default=10, help="Font size")
-        pars.add_argument("--stroke_width", type=float, default=1, help="Stroke width")
-        pars.add_argument("--split_group", type=float, default=0,
-                          help="Split design after this length to fit on page")
+        pars.add_argument("--stroke_width", type=float, default=0.265, help="Stroke width")
         pars.add_argument("--units", type=str, default="mm", help="Units")
-        # colors
+        # output settings
+        pars.add_argument("--document_format", type=str, default="a4",
+                          help="Sets output document format and splits design to fit pages.")
+        pars.add_argument("--page_margins", type=float, default=1, help="Page margins")
+        pars.add_argument("--margin_unit", type=str, default='mm', help="Page margin unit")
         pars.add_argument("--color_pattern", type=colors.Color, default=colors.Color('#000000ff'))
         pars.add_argument("--color_highlight1", type=colors.Color,
                           default=colors.Color('#ed333bff'))
@@ -81,8 +83,19 @@ class Bookart(EffectExtension):
         self.vertical_adjustment = self.svg.viewport_to_unit(self.vertical_adjustment)
         self.stroke_width = str(self.options.stroke_width) + self.options.units
         self.stroke_width = self.svg.viewport_to_unit(self.stroke_width)
-        split_group = str(self.options.split_group) + self.options.units
-        split_group = self.svg.viewport_to_unit(split_group)
+
+        # page format
+        margin = str(self.options.page_margins * 2) + self.options.margin_unit
+        if self.options.document_format == "letter":
+            # US Letter: 8.5 * 11 (in)
+            margin = units.convert_unit(margin, 'in')
+            split_group = str(8.5 - margin) + 'in'
+            split_group = self.svg.viewport_to_unit(split_group)
+        else:
+            # A4: 210 x 297 (mm)
+            margin = units.convert_unit(margin, 'mm')
+            split_group = str(210 - margin) + 'mm'
+            split_group = self.svg.viewport_to_unit(split_group)
 
         # prepare design
         self._generate_design_group()
@@ -98,7 +111,7 @@ class Bookart(EffectExtension):
             num_segments = 1
             lines_per_seg = self.total_pages
         else:
-            # add a little to line distance to adjust for rounding errors
+            # add a little to the line distance to adjust for rounding errors
             num_segments = ceil((self.line_distance * self.total_pages) / split_group)
             if num_segments == 0:
                 return
@@ -109,8 +122,13 @@ class Bookart(EffectExtension):
             line_paths, page_num_element = self._get_line_paths_and_numbers(segment, lines_per_seg)
 
             # insert into document
-            self._insert_elements_to_document(line_paths, page_num_element, lines, segment)
+            group = self._insert_elements_to_document(line_paths, page_num_element, lines, segment)
             lines[0].clip = clip
+
+            # create page
+            page = self._generate_page(segment)
+            # fit on page
+            self._fit_on_page(page, group)
 
     def _insert_elements_to_document(self, line_paths, page_num_element, lines, segment):
         # insert lines into the svg
@@ -126,16 +144,56 @@ class Bookart(EffectExtension):
         group.transform.add_matrix(self.transform)
         return group
 
+    def _generate_page(self, segment):
+        if self.options.document_format == "letter":
+            # US Letter: 8.5 * 11 (in)
+            width, height = [self.svg.viewport_to_unit('8.5in'), self.svg.viewport_to_unit('11in')]
+        else:
+            # A4: 210 x 297 (mm)
+            width, height = [self.svg.viewport_to_unit('210mm'), self.svg.viewport_to_unit('297mm')]
+
+        # set viewbox size to prevent bad sizing for the first page
+        if segment == 0:
+            self.svg.set('height', f'{height}{self.svg.unit}')
+            self.svg.set('width', f'{width}{self.svg.unit}')
+            self.svg.set('viewBox', f'0 0 {width} {height}')
+
+        page = self.svg.namedview.new_page(str((width * segment) + 5 * segment),
+                                           str(0),
+                                           str(width),
+                                           str(height))
+
+        # this is the first page, let's clean up all previously existing pages
+        if segment == 0:
+            for ink_page in self.svg.namedview.get_pages():
+                if ink_page != page:
+                    self.svg.namedview.remove(ink_page)
+        return page
+
+    def _fit_on_page(self, page, group):
+        # groups bounding box is somehow off, so lets use the bounding box of the lines element
+        group_bbox = group.getchildren()[1].bounding_box()
+
+        page_center_x = page.x + (page.width / 2)
+        group_center_x = group_bbox.center_x
+        transform_x = page_center_x - group_center_x
+
+        page_center_y = page.height / 2
+        group_center_y = group_bbox.center_y
+        transform_y = page_center_y - group_center_y
+
+        group.set('transform', f'translate({transform_x}, {transform_y})')
+
     def _get_line_paths_and_numbers(self, segment, lines_per_seg):
         top, bottom, left, right = self._get_line_positions()
         left += (segment * lines_per_seg * self.line_distance)
         right = min((left + lines_per_seg * self.line_distance), right)
 
         # create the line paths and page numbers
-        font_size = str(self.options.font_size) + self.options.units
-        style = f"text-anchor:middle;font-size:{self.options.font_size}{self.options.units}"
-        page_num_element = TextElement(y=str(bottom + self.svg.viewport_to_unit(font_size) + 2),
-                                       style=style)
+        font_size = self.svg.viewport_to_unit(str(self.options.font_size) + self.options.units)
+        style = f"text-anchor:middle;font-size:{font_size}"
+        small_font_style = f"font-size:{font_size / 2};fill:grey;"
+        page_num_element = TextElement(y=str(bottom + font_size + 2), style=style)
 
         page_count = self.options.first_page + (segment * lines_per_seg * 2)
         start = left
@@ -149,13 +207,9 @@ class Bookart(EffectExtension):
                 page_num_element.insert(0, Tspan(str(int(page_count)), x=str(left)))
             elif page_count % 10 == 0:
                 line_paths[2] += path
-            elif ((start == left or left + self.line_distance > right) and
-                  self.options.split_group != 0):
-                small_number_style = f"font-size:{self.options.font_size / 2}{self.options.units};\
-                                       fill:lightgrey;"
-                page_num_element.insert(0, Tspan(str(int(page_count)),
-                                                 x=str(left),
-                                                 style=small_number_style))
+            elif (start == left or left + self.line_distance > right):
+                tspan = Tspan(str(int(page_count)), x=str(left), style=small_font_style)
+                page_num_element.insert(0, tspan)
             line_paths[0] += path
             line_paths[3] += path
             page_count += 2
@@ -188,15 +242,9 @@ class Bookart(EffectExtension):
                        self.options.color_highlight1,
                        self.options.color_highlight2,
                        self.options.color_background]
-        # stroke width
-        if self.stroke_width == 0:
-            stroke_width = "stroke-width:1px;vector-effect:non-scaling-stroke;\
-                                 -inkscape-stroke:hairline;"
-        else:
-            stroke_width = f'stroke-width:{self.stroke_width}'
 
         for i in range(4):
-            style = f"fill:none;stroke:{line_colors[i]};{stroke_width}"
+            style = f"fill:none;stroke:{line_colors[i]};stroke-width:{self.stroke_width}"
             lines.append(PathElement(style=style))
         return lines
 
@@ -231,8 +279,7 @@ class Bookart(EffectExtension):
             self.line_distance = line_dist
             return
         scale_x = self.line_distance / line_dist
-        transform = f'scale({scale_x}, 1)'
-        self.design.transform = Transform(transform)
+        self.design.transform = Transform(f'scale({scale_x}, 1)')
         translate_x = bbox.left - self.design.bounding_box().left
         translate_y = bbox.bottom - self.design.bounding_box().bottom
         self.transform = f'translate({translate_x}, {translate_y})'
