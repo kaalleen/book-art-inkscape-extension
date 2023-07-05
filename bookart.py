@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+#
 # coding=utf-8
 #
 # Copyright (C) 2022 Kaalleen
@@ -47,16 +48,16 @@ class Bookart(EffectExtension):
         pars.add_argument("--settings-tab", type=str, default=None, dest="content_tab")
         pars.add_argument("--colors-tab", type=str, default=None, dest="layout_tab")
         # book settings
-        pars.add_argument("--first_page", type=int, default=250, help="First even page number")
+        pars.add_argument("--first_page", type=int, default=0, help="First even page number")
         pars.add_argument("--last_page", type=int, default=250, help="Last even page number")
         pars.add_argument("--pages_before", type=int, default=0, help="Pages before design")
         pars.add_argument("--pages_after", type=int, default=0, help="Pages after design")
-        pars.add_argument("--book_height", type=float, default=15, help="Book height")
+        pars.add_argument("--book_height", type=float, default=250, help="Book height")
         pars.add_argument("--line_distance", type=float, default=0,
                           help="Distance between lines")
         pars.add_argument("--vertical_adjustment", type=float, default=0.0,
                           help="Vertical adjustment")
-        pars.add_argument("--font_size", type=float, default=10, help="Font size")
+        pars.add_argument("--font_size", type=float, default=4, help="Font size")
         pars.add_argument("--stroke_width", type=float, default=0.265, help="Stroke width")
         pars.add_argument("--units", type=str, default="mm", help="Units")
         # output settings
@@ -64,13 +65,13 @@ class Bookart(EffectExtension):
                           help="Sets output document format and splits design to fit pages.")
         pars.add_argument("--page_margins", type=float, default=1, help="Page margins")
         pars.add_argument("--margin_unit", type=str, default='mm', help="Page margin unit")
-        pars.add_argument("--color_pattern", type=colors.Color, default=colors.Color('#000000ff'))
+        pars.add_argument("--color_pattern", type=colors.Color, default=colors.Color('#000000'))
         pars.add_argument("--color_highlight1", type=colors.Color,
-                          default=colors.Color('#ed333bff'))
+                          default=colors.Color('#ed333b'))
         pars.add_argument("--color_highlight2", type=colors.Color,
-                          default=colors.Color('#ffbe6fff'))
+                          default=colors.Color('#ffbe6f'))
         pars.add_argument("--color_background", type=colors.Color,
-                          default=colors.Color('#f9f06bff'))
+                          default=colors.Color('#f9f06b'))
 
     def effect(self):
         self.total_pages = (self.options.last_page - self.options.first_page) / 2
@@ -200,7 +201,7 @@ class Bookart(EffectExtension):
         if not page_count % 2 == 0:
             page_count += 1
         line_paths = [str() for _i in range(4)]
-        while left <= right + 0.1:
+        while left <= right:
             path = f'M {left} {top} L {left} {bottom} '
             if page_count % 20 == 0:
                 line_paths[1] += path
