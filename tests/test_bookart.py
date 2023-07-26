@@ -1,4 +1,7 @@
 # coding=utf-8
+"""
+Test the bookart extension
+"""
 
 from inkex.tester import ComparisonMixin, TestCase
 
@@ -26,6 +29,7 @@ class BookartTest(ComparisonMixin, TestCase):
          "--stroke_width=0.3", "--page_margins=2"),
         ("--id=woodpecker", "--first_page=12", "--last_page=350",
          "--pages_before=4", "--pages_after=4", "--line_distance=3",
+         "--page_margins=20", "--margin_unit=mm",
          "--color_pattern=#ff0000", "--color_highlight1=#00bc12",
          "--color_highlight2=#ebf400", "--color_background=#66ff88"),
     ]

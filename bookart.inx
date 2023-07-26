@@ -5,10 +5,10 @@
   <param name="tabs" type="notebook">
     <page name="settings-tab" gui-text="Book Settings">
       <label appearance="header">Pages</label>
-      <param name="first_page" type="int" min="1" max="5000" indent="1"
+      <param name="first_page" type="int" min="-20" max="5000" indent="1"
              gui-text="First even page number">2</param>
-      <param name="last_page" type="int" min="1" max="5000" indent="1"
-             gui-text="Last even page number">300</param>
+      <param name="last_page" type="int" min="2" max="5000" indent="1"
+             gui-text="Last even page number">250</param>
       <param name="pages_before" type="int" min="0" max="5000" indent="1"
              gui-text="Pages before the design"
              gui-description="Actual sheets (page numbers / 2)">0</param>
@@ -18,12 +18,11 @@
       <spacer />
       <label appearance="header">Measurements</label>
       <param name="book_height" type="float" min="0" max="2000"  indent="1" gui-text="Book height"
-             precision="2">200</param>
+             precision="2">250</param>
       <param name="vertical_adjustment" type="float" min="-1000" max="1000" indent="1"
              gui-text="Vertical adjustment" precision="2">0</param>
       <param name="line_distance" type="float" min="0" max="100" indent="1"
-             gui-text="Distance between lines"
-             gui-description="0 = no distortion" precision="2">0</param>
+             gui-text="Distance between lines" precision="2">1.5</param>
       <param name="font_size" type="float" min="0" max="40" indent="1"
              gui-text="Font size">1.0</param>
       <param name="stroke_width" type="float" min="0.01" max="20" indent="1"
@@ -62,6 +61,8 @@
              gui-text="Highlight 2">0xffbe6fff</param>
       <param name="color_background" type="color" appearance="colorbutton" indent="1"
              gui-text="Background">0xf9f06bff</param>
+      <param name="keep_pattern_color" type="boolean" indent="1"
+             gui-text="Pattern: keep original color">false</param>
     </page>
     <page name="about-tab" gui-text="About">
         <label appearance="header">Cut and fold book art pattern maker</label>
