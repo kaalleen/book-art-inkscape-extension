@@ -8,7 +8,7 @@ Create patterns for cut and fold book art with Inkscape.
 
 Download the zip file from the [release page](https://github.com/kaalleen/book-art-inkscape-extension/releases/latest) and extract to your Inkscape extensions folder.
 
-Works with Inkscape 1.2
+Works with Inkscape 1.2+
 
 ### How To Use The Extension
 
