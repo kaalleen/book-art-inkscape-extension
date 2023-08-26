@@ -2,7 +2,7 @@
 
 Create patterns for cut and fold book art with Inkscape.
 
-![Book art logo (kinda)](bookart_extension.png)
+![Book art logo](bookart_extension.png)
 
 ### How To Install
 

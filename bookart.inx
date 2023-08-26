@@ -19,8 +19,9 @@
       <label appearance="header">Measurements</label>
       <param name="book_height" type="float" min="0" max="2000"  indent="1" gui-text="Book height"
              precision="2">250</param>
-      <param name="vertical_adjustment" type="float" min="-1000" max="1000" indent="1"
-             gui-text="Vertical adjustment" precision="2">0</param>
+      <param name="margin_bottom" type="float" min="-1000" max="1000" indent="1" precision="2"
+             gui-text="Margin to bottom"
+             gui-description="Distance to bottom. 0 = centered.">0</param>
       <param name="line_distance" type="float" min="0" max="100" indent="1"
              gui-text="Distance between lines" precision="2">1.5</param>
       <param name="font_size" type="float" min="0" max="40" indent="1"

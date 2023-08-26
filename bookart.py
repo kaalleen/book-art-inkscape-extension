@@ -44,7 +44,9 @@ class Design:
     def elements(self):
         """get element selection (no selection returns all elements)"""
         if not self.svg.selection:
-            pattern_elements = self.svg.xpath('.//svg:rect|.//svg:circle|.//svg:ellipse|.//svg:path')
+            pattern_elements = self.svg.xpath(
+                './/svg:rect|.//svg:circle|'
+                './/svg:ellipse|.//svg:path')
             pattern_elements = list(pattern_elements)
         else:
             pattern_elements = self.svg.selection.rendering_order()
@@ -139,8 +141,7 @@ class PatternGroup:
         self.pattern.transform = Transform(f'scale({scale_factor}, 1)')
 
     def to_clip_path(self):
-        """generates a clip path with contains the pattern group
-           and inserts it into the svg
+        """generates a clip path which contains the pattern group and inserts it into the svg
            returns the clip element"""
         clip = ClipPath()
         clip.insert(0, self.pattern)
@@ -184,8 +185,12 @@ class Lines:  # pylint: disable=too-many-instance-attributes
         right += self.settings['pages_after'] * self.settings['line_distance']
 
         spacing = (self.settings['book_height'] - self.design_bbox.height) / 2
-        top = top - spacing - self.settings['vertical_adjustment']
-        bottom = bottom + spacing - self.settings['vertical_adjustment']
+        if self.settings['margin_bottom'] != 0:
+            bottom = bottom + self.settings['margin_bottom']
+            top = bottom - self.settings['book_height']
+        else:
+            top = top - spacing
+            bottom = bottom + spacing
 
         return {
             'left': left,
@@ -381,8 +386,8 @@ class Bookart(EffectExtension):
         pars.add_argument("--book_height", type=float, default=250, help="Book height")
         pars.add_argument("--line_distance", type=float, default=1.5,
                           help="Distance between lines")
-        pars.add_argument("--vertical_adjustment", type=float, default=0.0,
-                          help="Vertical adjustment")
+        pars.add_argument("--margin_bottom", type=float, default=0.0,
+                          help="Margin to bottom")
         pars.add_argument("--font_size", type=float, default=4, help="Font size")
         pars.add_argument("--stroke_width", type=float, default=0.265, help="Stroke width")
         pars.add_argument("--units", type=str, default="mm", help="Units")
@@ -417,7 +422,7 @@ class Bookart(EffectExtension):
             'font_size': self.convert_unit(self.options.font_size),
             'book_height': self.convert_unit(self.options.book_height),
             'line_distance': max(0.1, self.convert_unit(self.options.line_distance)),
-            'vertical_adjustment': self.convert_unit(self.options.vertical_adjustment),
+            'margin_bottom': self.convert_unit(self.options.margin_bottom),
             'stroke_width': self.convert_unit(self.options.stroke_width),
             'design_color': self.options.color_pattern,
             'highlight_colors': [
