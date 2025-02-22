@@ -45,7 +45,7 @@ class BookartTest(ComparisonMixin, TestCase):
             "--pages_after=10",
             "--book_height=270",
             "--line_distance=5",
-            "--vertical_adjustment=50",
+            "--margin_bottom=50",
             "--font_size=2",
             "--stroke_width=0.3",
             "--page_margins=2",
