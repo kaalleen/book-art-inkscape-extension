@@ -255,6 +255,15 @@ class Lines:  # pylint: disable=too-many-instance-attributes
         for lines in self.line_groups:
             layer.insert(0, lines)
 
+    def add_bottom_lines(self):
+        """Inserts a helper line at the bottom of the lines for aligning the book"""
+        style = (f"fill:none; stroke:black; stroke-width:{self.settings['stroke_width']}")
+        for linegroup in self.line_groups:
+            bbox = linegroup.getchildren()[-1].shape_box()
+            line = PathElement(style=style)
+            line.set('d', f'M {bbox.left}, {bbox.bottom} {bbox.right}, {bbox.bottom}')
+            linegroup.append(line)
+
 
 class Text:  # pylint: disable=too-few-public-methods
     """Holds the text for the page numbers"""
@@ -405,6 +414,8 @@ class Bookart(EffectExtension):
                           default=Color('#f9f06b'))
         pars.add_argument("--keep_pattern_color", type=Boolean, default=False,
                           help="Pattern: keep original color")
+        pars.add_argument("--bottom_line", type=Boolean, default=False,
+                          help="Add bottom line for book aligning")
 
     def effect(self):
         total_pages = (self.options.last_page - self.options.first_page) / 2
@@ -462,6 +473,8 @@ class Bookart(EffectExtension):
             design_clips,
             self.settings
         )
+        if self.options.bottom_line:
+            lines.add_bottom_lines()
 
         # insert into document
         layer = Layer()

@@ -64,6 +64,8 @@
              gui-text="Background">0xf9f06bff</param>
       <param name="keep_pattern_color" type="boolean" indent="1"
              gui-text="Pattern: keep original color">false</param>
+      <param name="bottom_line" type="boolean" indent="1"
+             gui-text="Add bottom line" gui_description="Add line for book aligning">false</param>
     </page>
     <page name="about-tab" gui-text="About">
         <label appearance="header">Cut and fold book art pattern maker</label>
